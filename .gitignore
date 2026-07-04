@@ -1,0 +1,8 @@
+# Ignore the entire node_modules folder
+node_modules/
+
+# Ignore the package.json file
+package.json
+package-lock.json
+tillnow.txt
+.env
