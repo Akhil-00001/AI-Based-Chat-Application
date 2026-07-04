@@ -2,7 +2,7 @@
 node_modules/
 
 # Ignore the package.json file
-package.json
-package-lock.json
+# package.json
+# package-lock.json
 tillnow.txt
 .env
