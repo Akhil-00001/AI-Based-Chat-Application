@@ -295,9 +295,12 @@ const MessageInput = ({
             bottom: "75px",
             left: "70px",
             zIndex: 1000,
+            overflow:"hidden",
           }}
         >
           <EmojiPicker
+          height={400}
+          width={250}
             onEmojiClick={(emojiData) => {
               onChange(value + emojiData.emoji);
               setShowEmojiPicker(false);

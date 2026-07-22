@@ -1507,6 +1507,7 @@ const Chat = () => {
       height: "100vh",
       width: "100%",
       background: theme.pageBg,
+      overflow:"hidden",
     },
     chatSection: {
       flex: 1,
@@ -1553,7 +1554,7 @@ const Chat = () => {
   return (
     <div style={styles.page}>
       <>
-        {!showRail && mobileView === "sidebar" && <button
+        {!showRail && (!isMobile || mobileView === "sidebar") && <button
           ref={menuButtonRef}
           onClick={() => setShowRail(prev => !prev)}
           style={{
@@ -1988,9 +1989,9 @@ const Chat = () => {
             bottom: 30,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "#1f1f1f",
-            color: "#fff",
-            padding: "10px 18px",
+            background: `${theme.panelBg}`,
+            color: `${theme.textPrimary}`,
+            padding:isMobile ? "8px 14px" : "10px 18px",
             borderRadius: "8px",
             zIndex: 100000,
             fontSize: "14px",

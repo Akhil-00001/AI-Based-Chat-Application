@@ -78,8 +78,8 @@ export const darkTheme = {
   selectedConversationBg: "#1e3a8a",
 
 
-  messageOwnBg: "#748ed4",
-  messageOtherBg: "#a558ad",
+  messageOwnBg: "#345233",
+  messageOtherBg: "#25252B",
 
 
   dateChipBg: "#334155",

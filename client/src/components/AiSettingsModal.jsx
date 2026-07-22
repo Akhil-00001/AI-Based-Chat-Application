@@ -112,6 +112,8 @@ const AISettingsModal = ({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
+          
+        margin : "0px 30px",
           width: 420,
           borderRadius: 16,
           padding: 24,

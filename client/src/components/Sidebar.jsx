@@ -32,6 +32,9 @@ const Sidebar = ({
     tabContainer: {
       display: "flex",
       borderBottom: `1px solid ${theme.border}`,
+      position:"sticky",
+      top:0,
+      background:theme.panelBg,
     },
 
     tab: {
@@ -76,6 +79,7 @@ const Sidebar = ({
     list: {
       flex: 1,
       overflowY: "auto",
+      position:"relative",
     },
     emptyText: {
       padding: "16px",

@@ -22,7 +22,7 @@ const HighlightedText = ({ text = "", search }) => {
             <span
               style={{
                 background: "#FFD54F",
-                color: "#000",
+                color : theme.logout,
                 padding: "1px 2px",
                 borderRadius: 3,
                 fontWeight: 600,
@@ -31,7 +31,7 @@ const HighlightedText = ({ text = "", search }) => {
               {part}
             </span>
           ) : (
-            part
+              part
           )}
         </Fragment>
       ))}

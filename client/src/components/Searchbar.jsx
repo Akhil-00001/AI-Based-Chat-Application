@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 import upIcon from "../assets/up.png"
 import downIcon from "../assets/down.png"
 import crossIcon from "../assets/cross.png"
+import useResponsive from "./hooks/useResponsive";
 
 const SearchBar = ({
   open,
@@ -17,7 +18,7 @@ const SearchBar = ({
   inputRef,
 }) => {
   const { theme } = useTheme();
-
+  const {isMobile} = useResponsive()
   useEffect(() => {
     if (open && inputRef?.current) {
       inputRef.current.focus();
@@ -53,13 +54,14 @@ const SearchBar = ({
               placeholder="Search messages..."
               style={{
                 flex: 1,
-                padding: "10px 12px",
+                minWidth:40,
+                padding: isMobile ? 8 :  "10px 12px",
                 borderRadius: 8,
                 border: `1px solid ${theme.border}`,
                 background: theme.inputBg,
                 color: theme.textPrimary,
                 outline: "none",
-                fontSize: 14,
+                fontSize: isMobile ? 12 :  14,
               }}
             />
 
@@ -76,9 +78,9 @@ const SearchBar = ({
             </span> */}
             <span
               style={{
-                minWidth: 52,
+                minWidth: isMobile ? 40 : 52,
                 textAlign: "center",
-                fontSize: 13,
+                fontSize:isMobile ? 10 : 13,
                 fontWeight: 600,
                 color: theme.textSecondary,
                 padding: "6px 10px",
@@ -92,11 +94,11 @@ const SearchBar = ({
                 : `${currentIndex + 1} / ${resultCount}`}
             </span>
 
-            <button style={{ background: theme.inputBg }} onClick={onPrev}><img src={upIcon} style={{ width: "20px" }} alt="" /></button>
+            <button style={{ background: theme.inputBg }} onClick={onPrev}><img src={upIcon} style={{ width: isMobile ? 12 : "20px" }} alt="" /></button>
 
-            <button style={{ background: theme.inputBg }} onClick={onNext}><img src={downIcon} style={{ width: "20px" }} alt="" /></button>
+            <button style={{ background: theme.inputBg }} onClick={onNext}><img src={downIcon} style={{ width: isMobile ? 12 : "20px" }} alt="" /></button>
 
-            <button style={{ background: theme.inputBg }} onClick={onClose}><img src={crossIcon} style={{ width: "20px" }} alt="" /></button>
+            <button style={{ background: theme.inputBg }} onClick={onClose}><img src={crossIcon} style={{ width: isMobile ? 12 : "20px" }} alt="" /></button>
           </div>
         </motion.div>
       )}

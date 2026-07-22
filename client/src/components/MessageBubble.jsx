@@ -13,7 +13,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
   isHighlighted, deleted, edited, searchQuery }) => {
   const pickerRef = useRef(null);
   const { theme } = useTheme();
-  const {isMobile} = useResponsive();
+  const { isMobile } = useResponsive();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 
@@ -206,13 +206,13 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
                   style={{
                     position: "absolute",
                     top: "25px",
-                    left: "40px",
+                    left:"-180px",
                     zIndex: 1000,
                   }}
                 >
                   <EmojiPicker
-                    width={320}
                     height={400}
+                    width={250}
                     onEmojiClick={(emojiData) => {
 
                       setIgnoreHover(true);
@@ -234,14 +234,14 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
       <div
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
-        
+
         style={{
 
           maxWidth: isMobile ? "60%" : "340px",
           minWidth: image
             ? (isMobile ? "170px" : "220px")
             // : isMobile ? "50%" : attachment?.type.includes("audio") ? "30%" : "10%",
-            :"unset",
+            : "unset",
           padding: "10px 12px 8px",
           borderTopRightRadius: isOwnMessage
             ? isGrouped
@@ -298,7 +298,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
               }}
               style={{
                 cursor: "pointer",
-                borderLeft: "3px solid #4f9cff",
+                borderLeft: `3px solid ${theme.accent}`,
                 paddingLeft: "8px",
                 marginBottom: "6px",
                 opacity: 0.9,
@@ -336,6 +336,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
               style={{
                 fontSize: "14px",
                 lineHeight: "1.4",
+                color:theme.textPrimary,
               }}
             >
               <HighlightedText
