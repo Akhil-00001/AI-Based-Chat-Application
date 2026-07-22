@@ -12,17 +12,17 @@ import "./styles/scrollbar.css"
 
 function App() {
 
-  useEffect(() => {
-    const disableContextMenu = (e) => {
-      e.preventDefault();
-    };
+  // useEffect(() => {
+  //   const disableContextMenu = (e) => {
+  //     e.preventDefault();
+  //   };
 
-    document.addEventListener("contextmenu", disableContextMenu);
+  //   document.addEventListener("contextmenu", disableContextMenu);
 
-    return () => {
-      document.removeEventListener("contextmenu", disableContextMenu);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("contextmenu", disableContextMenu);
+  //   };
+  // }, []);
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />

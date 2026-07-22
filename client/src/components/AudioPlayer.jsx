@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import playIcon from "../assets/play.png"
 import pauseIcon from "../assets/pause.png"
+import useResponsive from "./hooks/useResponsive";
 export default function AudioPlayer({ src }) {
 
     const audioRef = useRef(null);
     const { theme } = useTheme();
     const sliderRef = useRef(null);
+    const {isMobile} = useResponsive();
     const [playing, setPlaying] = useState(false);
     const [dragging, setDragging] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -168,7 +170,7 @@ export default function AudioPlayer({ src }) {
 
             cursor: "pointer",
 
-
+            width : isMobile ? "100px" : "200px" ,
         },
 
         progress: {
@@ -223,18 +225,18 @@ export default function AudioPlayer({ src }) {
 
             background: theme.panelBg,
 
-            width: "300px",
+            width: "100%",
 
         },
 
         play: {
-            display:"flex",
-            alignItems:"center",
+            display: "flex",
+            alignItems: "center",
             width: 34,
 
             height: 34,
 
-            borderRadius: "50%",
+            borderRadius: "40%",
 
             border: "none",
 
@@ -262,9 +264,9 @@ export default function AudioPlayer({ src }) {
 
         time: {
 
-            fontSize: 13,
+            fontSize: isMobile ? 10 : 13,
 
-            minWidth: 70,
+            minWidth: isMobile ? 40 : 70,
 
             color: theme.timestampText,
 
@@ -283,48 +285,51 @@ export default function AudioPlayer({ src }) {
             />
 
             <button
-                style={{...styles.play , justifyContent:"center"}}
+                style={{ ...styles.play, justifyContent: "center" }}
                 onClick={togglePlay}
             >
-                {playing ? <img src={pauseIcon} style={{ width: 14 ,alignSelf:"center"}} alt="" /> : <img src={playIcon} style={{ width: "20px" }} alt="" />}
+                {playing ? <img src={pauseIcon} style={{ width: isMobile ? 15 : 20, alignSelf: "center" }} alt="" /> : <img src={playIcon} style={{ width: isMobile ? 15 : "20px" }} alt="" />}
             </button>
-
-            <div
-                ref={sliderRef}
-                onClick={handleSeek}
-                style={styles.track}
-            >
+            <div style={{ display: "flex", flexDirection: "column" , gap:"5px"}}>
                 <div
-                    style={{
-                        ...styles.progress,
-                        width: `${progress}%`,
-                    }}
-                />
+                    ref={sliderRef}
+                    onClick={handleSeek}
+                    style={styles.track}
+                >
+                    <div
+                        style={{
+                            ...styles.progress,
+                            width: `${progress}%`,
+                        }}
+                    />
 
-                <div
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow =
-                            "0 0 16px rgba(124,58,237,.6)";
-                    }}
+                    <div
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.boxShadow =
+                                "0 0 16px rgba(124,58,237,.6)";
+                        }}
 
-                    onMouseLeave={(e) => {
-                        if (dragging) return;
+                        onMouseLeave={(e) => {
+                            if (dragging) return;
 
-                        e.currentTarget.style.boxShadow =
-                            "0 0 10px rgba(124,58,237,.35)";
-                    }}
-                    onMouseDown={() => setDragging(true)}
-                    style={{
-                        ...styles.thumb,
-                        left: `${progress}%`,
-                        transform: `translate(-50%,-50%) scale(${dragging ? 1.35 : 1})`,
-                    }}
-                />
+                            e.currentTarget.style.boxShadow =
+                                "0 0 10px rgba(124,58,237,.35)";
+                        }}
+                        onMouseDown={() => setDragging(true)}
+                        style={{
+                            ...styles.thumb,
+                            left: `${progress}%`,
+                            transform: `translate(-50%,-50%) scale(${dragging ? 1.35 : 1})`,
+                        }}
+                    />
+                </div>
+
+                <span style={styles.time}>
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
             </div>
 
-            <span style={styles.time}>
-                {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
+
 
         </div>
 

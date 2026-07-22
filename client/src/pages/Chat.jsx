@@ -20,20 +20,21 @@ import editIcon from "../assets/edit.png"
 import copyIcon from "../assets/copy.png"
 import pinIcon from "../assets/pin.png"
 import forwardIcon from "../assets/forward.png"
-
-import { color } from "framer-motion";
+import { AnimatePresence, color, motion } from "framer-motion";
 import ForwardModal from "../components/ForwardModal";
+import useResponsive from "../components/hooks/useResponsive";
+import { HiOutlineBars3 } from "react-icons/hi2";
 
 
 const Chat = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { isMobile } = useResponsive();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  // const [arrivalMessage, setArrivalMessage] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [showUserPicker, setShowUserPicker] = useState(false);
@@ -84,6 +85,13 @@ const Chat = () => {
   const [showForwardModal, setShowForwardModal] = useState(false);
   const [forwardMessage, setForwardMessage] = useState(null);
   const [selectedChats, setSelectedChats] = useState([]);
+  const [mobileView, setMobileView] = useState("sidebar");
+  const [showRail, setShowRail] = useState(false);
+  const railRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const socketUrl = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace("/api", "")
+    : "http://localhost:5000";
 
   //message helper
   const updateMessage = (messageId, updater) => {
@@ -136,15 +144,16 @@ const Chat = () => {
   //socket part start
   //socket connection
   useEffect(() => {
-    socket.current = io("http://localhost:5000", {
+    socket.current = io(socketUrl, {
       transports: ["websocket"],
     });
 
-
     return () => {
-      socket.current.disconnect();
+      if (socket.current) {
+        socket.current.disconnect();
+      }
     };
-  }, []);
+  }, [socketUrl]);
   //socket new user addition
   useEffect(() => {
     if (!socket.current || !user?._id) return;
@@ -533,6 +542,9 @@ const Chat = () => {
   const handleSelectConversation = async (conversation) => {
     setSelectedConversation(conversation);
     setSelectedUser(conversation.otherUser);
+    if (isMobile) {
+      setMobileView("chat");
+    }
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
@@ -626,20 +638,6 @@ const Chat = () => {
   };
 
 
-
-  /* */
-
-
-
-
-
-
-
-
-
-  /**/
-
-
   //newchat
   const handleStartNewChat = (clickedUser) => {
 
@@ -648,6 +646,7 @@ const Chat = () => {
 
     setMessages([]);
     setIsNewChat(true);
+    setMobileView("chat")
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -1361,6 +1360,27 @@ const Chat = () => {
     color: theme.textPrimary,
   };
 
+  //handleclick outside 
+  useEffect(() => {
+    function handleClick(e) {
+      if (
+        railRef.current &&
+        !railRef.current.contains(e.target) &&
+        !menuButtonRef.current.contains(e.target)
+      ) {
+        setShowRail(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClick);
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClick
+      );
+  }, []);
+
   const menuDivider = {
     height: "1px",
     background: theme.border,
@@ -1406,7 +1426,7 @@ const Chat = () => {
     if (!dontscroll)
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     setDontscroll(false);
-  }, [messages, isOtherUserTyping]);
+  }, [messages, isOtherUserTyping, mobileView]);
 
   //reply scrolldown
   const scrollToMessage = (messageId) => {
@@ -1490,6 +1510,7 @@ const Chat = () => {
     },
     chatSection: {
       flex: 1,
+      width: "100%",
       display: "flex",
       flexDirection: "column",
       background: theme.panelBg,
@@ -1531,355 +1552,314 @@ const Chat = () => {
   };
   return (
     <div style={styles.page}>
-      <NavigationRail
-        // user={user}
-        // darkMode={isDark}
-        // toggleTheme={toggleTheme}
-        // onLogout={handleLogout}
-        onProfileClick={() => setShowProfileModal(true)}
-      />
+      <>
+        {!showRail /*&& mobileView === "sidebar"*/ && <button
+          ref={menuButtonRef}
+          onClick={() => setShowRail(prev => !prev)}
+          style={{
+            position: "fixed",
+            left: 15,
+            top: 15,
+            width: 42,
+            height: 42,
+            borderRadius: "50%",
+            border: "none",
+            cursor: "pointer",
+            zIndex: 1001,
+            background: theme.panelBg,
+            boxShadow: "0 8px 25px rgba(0,0,0,.2)",
+          }}
+        >
+          <HiOutlineBars3 stroke={theme.textPrimary} size={24} />
+        </button>}
+
+        {showRail && (
+          <div
+            onClick={() => setShowRail(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,.2)",
+              zIndex: 999,
+            }}
+          />
+        )}
+
+        <AnimatePresence>
+          {showRail && (
+            <motion.div
+              ref={railRef}
+              initial={{ x: -90 }}
+              animate={{ x: 0 }}
+              exit={{ x: -90 }}
+              transition={{ duration: .2 }}
+              style={{
+                position: "fixed",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 1000,
+              }}
+            >
+              <NavigationRail
+                onProfileClick={() =>
+                  setShowProfileModal(true)
+                }
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
 
       <ProfileModal
         open={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         user={user}
       />
-
-      <Sidebar
-        conversations={conversations}
-        selectedConversation={selectedConversation}
-        onSelectConversation={handleSelectConversation}
-        allUsers={availableUsersForNewChat}
-        showUserPicker={showUserPicker}
-        setShowUserPicker={setShowUserPicker}
-        conversationsLoading={conversationsLoading}
-        onStartNewChat={handleStartNewChat}
-        newChatPanelRef={newChatPanelRef}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        typingConversationIds={typingConversationIds}
-        activeTab={activeTab}
-        changeTab={changeTab}
-        newRequestCount={newRequestCount}
-        requests={requests}
-        newChatSearch={newChatSearch}
-        setNewChatSearch={setNewChatSearch}
-      />
-
-      <div style={styles.chatSection}>
-        <ChatHeader name={selectedUser ? selectedUser.name : "Select a user"} aiSettings={aiSettings} setShowAISettings={setShowAISettings} isOnline={isSelectedUserOnline} isTyping={isOtherUserTyping} pinnedMessage={selectedConversation?.pinnedMessage}
-          onPinnedClick={() =>
-            scrollToMessage(selectedConversation?.pinnedMessage?._id)
-          } toggleSearch={() => { setShowSearch((prev) => !prev); setMessageSearch("") }
-          } onUnpin={handleUnpinMessage} />
-        <SearchBar
-          open={showSearch}
-          value={messageSearch}
-          onChange={setMessageSearch}
-          onClose={() => {
-            setShowSearch(false);
-            setMessageSearch("");
-          }}
-          resultCount={matchedMessageIds.length}
-          currentIndex={currentMatchIndex}
-          onNext={handleNextResult}
-          onPrev={handlePreviousResult}
-          inputRef={searchInputRef}
+      {(!isMobile || mobileView == "sidebar") && (
+        <Sidebar
+          conversations={conversations}
+          selectedConversation={selectedConversation}
+          onSelectConversation={handleSelectConversation}
+          allUsers={availableUsersForNewChat}
+          showUserPicker={showUserPicker}
+          setShowUserPicker={setShowUserPicker}
+          conversationsLoading={conversationsLoading}
+          onStartNewChat={handleStartNewChat}
+          newChatPanelRef={newChatPanelRef}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          typingConversationIds={typingConversationIds}
+          activeTab={activeTab}
+          changeTab={changeTab}
+          newRequestCount={newRequestCount}
+          requests={requests}
+          newChatSearch={newChatSearch}
+          setNewChatSearch={setNewChatSearch}
         />
+      )}
 
-        {
-          selectedConversation &&
-          selectedConversation.status === "pending" &&
-          selectedConversation.requestedBy !== user._id && (
+      {(!isMobile || mobileView == "chat") && (
+        <div style={styles.chatSection}>
+          <ChatHeader name={selectedUser ? selectedUser.name : "Select a user"} aiSettings={aiSettings} setShowAISettings={setShowAISettings} isOnline={isSelectedUserOnline} isTyping={isOtherUserTyping} pinnedMessage={selectedConversation?.pinnedMessage}
+            onPinnedClick={() =>
+              scrollToMessage(selectedConversation?.pinnedMessage?._id)
+            } toggleSearch={() => { setShowSearch((prev) => !prev); setMessageSearch("") }
+            } onUnpin={handleUnpinMessage} setMobileView={setMobileView} />
+          <SearchBar
+            open={showSearch}
+            value={messageSearch}
+            onChange={setMessageSearch}
+            onClose={() => {
+              setShowSearch(false);
+              setMessageSearch("");
+            }}
+            resultCount={matchedMessageIds.length}
+            currentIndex={currentMatchIndex}
+            onNext={handleNextResult}
+            onPrev={handlePreviousResult}
+            inputRef={searchInputRef}
+          />
 
-            <div
-              style={{
-                padding: 16,
-                borderBottom: `1px solid ${theme.border}`,
-                background: theme.panelBg,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-
-              <div>
-
-                <div
-                  style={{
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    color: theme.textPrimary,
-                  }}
-                >
-                  📩 Chat Request
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: theme.textSecondary,
-                  }}
-                >
-                  Accepting lets both of you exchange messages.
-                </div>
-
-              </div>
+          {
+            selectedConversation &&
+            selectedConversation.status === "pending" &&
+            selectedConversation.requestedBy !== user._id && (
 
               <div
                 style={{
+                  padding: 16,
+                  borderBottom: `1px solid ${theme.border}`,
+                  background: theme.panelBg,
                   display: "flex",
-                  gap: 10,
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
 
-                <button
-                  style={{ outline: `2px solid ${theme.border}`, color: theme.sendButtonText, background: theme.accent, borderRadius: 4, width: 80, height: 35 }}
-                  onClick={handleAcceptRequest}
-                >
-                  Accept
-                </button>
+                <div>
 
-                <button
-                  style={{ outline: `2px solid ${theme.border}`, color: theme.textPrimary, background: theme.panelBg, borderRadius: 4, width: 80, height: 35 }}
-                  onClick={handleRejectRequest}
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      color: theme.textPrimary,
+                    }}
+                  >
+                    📩 Chat Request
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: theme.textSecondary,
+                    }}
+                  >
+                    Accepting lets both of you exchange messages.
+                  </div>
+
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    flexDirection:isMobile ? "column" : "row",
+                  }}
                 >
-                  Reject
-                </button>
+
+                  <button
+                    style={{ outline: `2px solid ${theme.border}`, color: theme.sendButtonText, background: theme.accent, borderRadius: 4, width: 80, height: 35 }}
+                    onClick={handleAcceptRequest}
+                  >
+                    Accept
+                  </button>
+
+                  <button
+                    style={{ outline: `2px solid ${theme.border}`, color: theme.textPrimary, background: theme.panelBg, borderRadius: 4, width: 80, height: 35 }}
+                    onClick={handleRejectRequest}
+                  >
+                    Reject
+                  </button>
+
+                </div>
 
               </div>
 
-            </div>
+            )}
 
-          )}
+          <div style={styles.messagesContainer}>
+            {!selectedUser ? (
+              <div style={styles.placeholder}>
+                <h2>Select a user to start chatting</h2>
+                <p>Your conversations will appear here.</p>
+              </div>
+            ) : messagesLoading ? (
+              <div style={styles.placeholder}>
+                <h3>Loading messages...</h3>
+              </div>
+            ) : messages.length === 0 ? (
+              <div style={styles.placeholder}>
+                <h3>No messages yet</h3>
+                <p>Start the conversation by sending the first message.</p>
+              </div>
+            ) : (
+              <>
+                {messages.map((msg, index) => {
+                  const currentLabel = formatMessageDateLabel(msg.createdAt);
+                  const previousLabel =
+                    index > 0
+                      ? formatMessageDateLabel(messages[index - 1].createdAt)
+                      : null;
 
-        <div style={styles.messagesContainer}>
-          {!selectedUser ? (
-            <div style={styles.placeholder}>
-              <h2>Select a user to start chatting</h2>
-              <p>Your conversations will appear here.</p>
-            </div>
-          ) : messagesLoading ? (
-            <div style={styles.placeholder}>
-              <h3>Loading messages...</h3>
-            </div>
-          ) : messages.length === 0 ? (
-            <div style={styles.placeholder}>
-              <h3>No messages yet</h3>
-              <p>Start the conversation by sending the first message.</p>
-            </div>
-          ) : (
-            <>
-              {messages.map((msg, index) => {
-                const currentLabel = formatMessageDateLabel(msg.createdAt);
-                const previousLabel =
-                  index > 0
-                    ? formatMessageDateLabel(messages[index - 1].createdAt)
+                  const showDateSeparator = index === 0 || currentLabel !== previousLabel;
+                  const isSameSenderAsPrevious = index > 0 && messages[index - 1].sender === msg.sender &&
+                    !showDateSeparator;
+                  const nextMessage = messages[index + 1];
+
+                  const nextLabel = nextMessage
+                    ? formatMessageDateLabel(nextMessage.createdAt)
                     : null;
 
-                const showDateSeparator = index === 0 || currentLabel !== previousLabel;
-                const isSameSenderAsPrevious = index > 0 && messages[index - 1].sender === msg.sender &&
-                  !showDateSeparator;
-                const nextMessage = messages[index + 1];
+                  const isSameSenderAsNext =
+                    !!nextMessage &&
+                    nextMessage.sender === msg.sender &&
+                    nextLabel === currentLabel;
+                  return (
+                    <div key={msg._id}
+                      ref={(el) => (messageRefs.current[msg._id] = el)}>
+                      {showDateSeparator && (
+                        <div style={styles.dateSeparatorWrapper}>
+                          <span style={styles.dateSeparator}>{currentLabel}</span>
+                        </div>
+                      )}
 
-                const nextLabel = nextMessage
-                  ? formatMessageDateLabel(nextMessage.createdAt)
-                  : null;
+                      <MessageBubble
+                        text={msg.text}
+                        image={msg.image}
+                        attachment={msg.attachment}
+                        isOwnMessage={msg.sender === user._id}
+                        deliveredAt={msg.deliveredAt}
+                        seenAt={msg.seenAt}
+                        time={msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", }) : ""}
+                        isGrouped={isSameSenderAsPrevious}
+                        isGroupedWithNext={isSameSenderAsNext}
+                        onImageClick={setOpenedImage}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
 
-                const isSameSenderAsNext =
-                  !!nextMessage &&
-                  nextMessage.sender === msg.sender &&
-                  nextLabel === currentLabel;
-                return (
-                  <div key={msg._id}
-                    ref={(el) => (messageRefs.current[msg._id] = el)}>
-                    {showDateSeparator && (
-                      <div style={styles.dateSeparatorWrapper}>
-                        <span style={styles.dateSeparator}>{currentLabel}</span>
-                      </div>
-                    )}
+                          setContextMenu({
+                            mouseX: e.clientX,
+                            mouseY: e.clientY,
+                            message: msg,
+                          });
+                        }}
+                        replyTo={msg.replyTo}
+                        onReplyClick={scrollToMessage}
+                        isHighlighted={highlightedMessage === msg._id}
+                        // originalText={msg.originalText}
+                        // ai={msg.ai}
+                        deleted={msg.deleted}
+                        messageId={msg._id}
+                        reactions={msg.reactions}
+                        onReact={handleReaction}
+                        edited={msg.edited}
+                        searchQuery={searchQuery}
+                      />
 
-                    <MessageBubble
-                      text={msg.text}
-                      image={msg.image}
-                      attachment={msg.attachment}
-                      isOwnMessage={msg.sender === user._id}
-                      deliveredAt={msg.deliveredAt}
-                      seenAt={msg.seenAt}
-                      time={msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", }) : ""}
-                      isGrouped={isSameSenderAsPrevious}
-                      isGroupedWithNext={isSameSenderAsNext}
-                      onImageClick={setOpenedImage}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-
-                        setContextMenu({
-                          mouseX: e.clientX,
-                          mouseY: e.clientY,
-                          message: msg,
-                        });
-                      }}
-                      replyTo={msg.replyTo}
-                      onReplyClick={scrollToMessage}
-                      isHighlighted={highlightedMessage === msg._id}
-                      // originalText={msg.originalText}
-                      // ai={msg.ai}
-                      deleted={msg.deleted}
-                      messageId={msg._id}
-                      reactions={msg.reactions}
-                      onReact={handleReaction}
-                      edited={msg.edited}
-                      searchQuery={searchQuery}
-                    />
-
-                  </div>
-                );
-              })}
-            </>
-          )}
-          {selectedUser && isOtherUserTyping && <TypingIndicator />}
-          <div ref={messagesEndRef} />
-        </div>
-        {
-          (selectedConversation || isNewChat) &&
-          <MessageInput
-            value={newMessage}
-            onChange={handleMessageChange}
-            onSend={handleSendMessage}
-            selectedAttachment={selectedAttachment}
-            setSelectedAttachment={setSelectedAttachment}
-            showEmojiPicker={showEmojiPicker}
-            setShowEmojiPicker={setShowEmojiPicker}
-            replyMessage={replyMessage}
-            setReplyMessage={setReplyMessage}
-            editMessage={editMessage}
-            setEditMessage={setEditMessage}
-            isRecording={isRecording}
-            startRecording={startRecording}
-            stopRecording={stopRecording}
-            cancelRecording={cancelRecording}
-            recordingTime={formatTime(recordingTime)}
-          />}
-        <ImageViewer
-          image={openedImage}
-          onClose={() => setOpenedImage(null)}
-        />
-        {contextMenu && (
-          <div
-            style={{
-              position: "fixed",
-              top: contextMenu.mouseY,
-              left: contextMenu.mouseX,
-              background: theme.chatBg,
-              border: `1px solid ${theme.border}`,
-              borderRadius: 10,
-              boxShadow: "0 8px 20px rgba(0,0,0,.25)",
-              zIndex: 10000,
-              overflow: "hidden",
-              minWidth: 170,
-            }}
-          >
-            {/* //reply */}
-            <div
-              onClick={() => {
-                setReplyMessage(contextMenu.message);
-                setContextMenu(null);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              style={menuItem}
-            >
-              <img src={replyIcon} style={{ width: 20 }} alt="" /> Reply
-            </div>
-
-            <div
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              onClick={() => {
-                setForwardMessage(contextMenu.message);
-                setShowForwardModal(true);
-                setContextMenu(null);
-              }}
-              style={menuItem}
-            >
-              <img src={forwardIcon} width={20} alt="" /> Forward
-            </div>
-
-            {/* edit */}
-            {contextMenu.message.sender === user._id &&
-              !contextMenu.message.deleted && (
-                <div
-                  onClick={() => {
-                    setEditMessage(contextMenu.message);
-                    setNewMessage(
-                      contextMenu.message.originalText ||
-                      contextMenu.message.text
-                    );
-                    setContextMenu(null);
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                  }}
-                  style={menuItem}
-                >
-                  <img src={editIcon} style={{ width: 20 }} alt="" /> Edit
-                </div>
-              )}
-            {/* copy */}
-            <div
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(
-                    contextMenu.message.originalText ||
-                    contextMenu.message.text
+                    </div>
                   );
-
-                  setToast("Copied!");
-                } catch (err) {
-                  console.error(err);
-                }
-
-                setContextMenu(null);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              style={menuItem}
-            >
-              <img src={copyIcon} style={{ width: 20 }} alt="" /> Copy
-            </div>
-            {/* pin */}
+                })}
+              </>
+            )}
+            {selectedUser && isOtherUserTyping && <TypingIndicator />}
+            <div ref={messagesEndRef} />
+          </div>
+          {
+            (selectedConversation || isNewChat) &&
+            <MessageInput
+              value={newMessage}
+              onChange={handleMessageChange}
+              onSend={handleSendMessage}
+              selectedAttachment={selectedAttachment}
+              setSelectedAttachment={setSelectedAttachment}
+              showEmojiPicker={showEmojiPicker}
+              setShowEmojiPicker={setShowEmojiPicker}
+              replyMessage={replyMessage}
+              setReplyMessage={setReplyMessage}
+              editMessage={editMessage}
+              setEditMessage={setEditMessage}
+              isRecording={isRecording}
+              startRecording={startRecording}
+              stopRecording={stopRecording}
+              cancelRecording={cancelRecording}
+              recordingTime={formatTime(recordingTime)}
+            />}
+          <ImageViewer
+            image={openedImage}
+            onClose={() => setOpenedImage(null)}
+          />
+          {contextMenu && (
             <div
-              onClick={handlePinMessage}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,.08)";
+              style={{
+                position: "fixed",
+                top: contextMenu.mouseY,
+                left: contextMenu.mouseX,
+                background: theme.chatBg,
+                border: `1px solid ${theme.border}`,
+                borderRadius: 10,
+                boxShadow: "0 8px 20px rgba(0,0,0,.25)",
+                zIndex: 10000,
+                overflow: "hidden",
+                minWidth: 170,
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              style={menuItem}
             >
-              <img src={pinIcon} style={{ width: 20 }} alt="" /> Pin Message
-            </div>
-            <div style={menuDivider} />
-            {/* delete */}
-            {contextMenu.message.sender === user._id && (
+              {/* //reply */}
               <div
-                onClick={handleDeleteMessage}
+                onClick={() => {
+                  setReplyMessage(contextMenu.message);
+                  setContextMenu(null);
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(255,255,255,.08)";
                 }}
@@ -1888,21 +1868,119 @@ const Chat = () => {
                 }}
                 style={menuItem}
               >
-                <img src={deleteIcon} style={{ width: 20 }} alt="" /> Delete
+                <img src={replyIcon} style={{ width: 20 }} alt="" /> Reply
               </div>
-            )}
 
-          </div>
-        )
-        }
-        <AISettingsModal
-          open={showAISettings}
-          onClose={() => setShowAISettings(false)}
-          settings={aiSettings}
-          setSettings={setAISettings}
-          onSave={saveAISettings}
-        />
-      </div>
+              {/* forward */}
+              <div
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+                onClick={() => {
+                  setForwardMessage(contextMenu.message);
+                  setShowForwardModal(true);
+                  setContextMenu(null);
+                }}
+                style={menuItem}
+              >
+                <img src={forwardIcon} width={20} alt="" /> Forward
+              </div>
+
+              {/* edit */}
+              {contextMenu.message.sender === user._id &&
+                !contextMenu.message.deleted && (
+                  <div
+                    onClick={() => {
+                      setEditMessage(contextMenu.message);
+                      setNewMessage(
+                        contextMenu.message.originalText ||
+                        contextMenu.message.text
+                      );
+                      setContextMenu(null);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                    }}
+                    style={menuItem}
+                  >
+                    <img src={editIcon} style={{ width: 20 }} alt="" /> Edit
+                  </div>
+                )}
+              {/* copy */}
+              <div
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(
+                      contextMenu.message.originalText ||
+                      contextMenu.message.text
+                    );
+
+                    setToast("Copied!");
+                  } catch (err) {
+                    console.error(err);
+                  }
+
+                  setContextMenu(null);
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+                style={menuItem}
+              >
+                <img src={copyIcon} style={{ width: 20 }} alt="" /> Copy
+              </div>
+              {/* pin */}
+              <div
+                onClick={handlePinMessage}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+                style={menuItem}
+              >
+                <img src={pinIcon} style={{ width: 20 }} alt="" /> Pin Message
+              </div>
+              <div style={menuDivider} />
+              {/* delete */}
+              {contextMenu.message.sender === user._id && (
+                <div
+                  onClick={handleDeleteMessage}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                  style={menuItem}
+                >
+                  <img src={deleteIcon} style={{ width: 20 }} alt="" /> Delete
+                </div>
+              )}
+
+            </div>
+          )
+          }
+          <AISettingsModal
+            open={showAISettings}
+            onClose={() => setShowAISettings(false)}
+            settings={aiSettings}
+            setSettings={setAISettings}
+            onSave={saveAISettings}
+          />
+        </div>
+      )}
+
       {toast && (
         <div
           style={{

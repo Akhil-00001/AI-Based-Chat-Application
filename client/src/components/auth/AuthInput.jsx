@@ -1,3 +1,5 @@
+import useResponsive from "../hooks/useResponsive";
+
 export default function AuthInput({
     label,
     type = "text",
@@ -8,6 +10,40 @@ export default function AuthInput({
     autoComplete,
     required = true,
 }) {
+    const { isMobile } = useResponsive();
+    const styles = {
+        wrapper: {
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+        },
+
+        label: {
+            fontSize: 15,
+            fontWeight: 600,
+            color: "#444",
+        },
+
+        input: {
+            height: isMobile ? 40 : 56,
+
+            padding: "0 18px",
+
+            borderRadius: 14,
+
+            border: "1px solid #D9D9D9",
+
+            outline: "none",
+
+            fontSize: 15,
+
+            transition: "all .2s ease",
+
+            background: "#fff",
+
+            color: "#222",
+        },
+    };
     return (
         <div style={styles.wrapper}>
             {label && (
@@ -42,36 +78,3 @@ export default function AuthInput({
     );
 }
 
-const styles = {
-    wrapper: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-    },
-
-    label: {
-        fontSize: 15,
-        fontWeight: 600,
-        color: "#444",
-    },
-
-    input: {
-        height: 56,
-
-        padding: "0 18px",
-
-        borderRadius: 14,
-
-        border: "1px solid #D9D9D9",
-
-        outline: "none",
-
-        fontSize: 15,
-
-        transition: "all .2s ease",
-
-        background: "#fff",
-
-        color: "#222",
-    },
-};

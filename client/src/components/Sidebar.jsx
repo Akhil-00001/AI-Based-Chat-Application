@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { AnimatePresence, motion } from "framer-motion";
 import logo from "../assets/logo.png"
+import useResponsive from "./hooks/useResponsive";
 
 const Sidebar = ({
   conversations,
@@ -24,6 +25,7 @@ const Sidebar = ({
   newChatSearch,
   setNewChatSearch,
 }) => {
+  const { isMobile } = useResponsive();
   const { user, logout } = useAuth();
   const { theme, isDark, toggleTheme } = useTheme();
   const styles = {
@@ -52,7 +54,8 @@ const Sidebar = ({
       borderBottom: `1px solid ${theme.border}`,
     },
     sidebar: {
-      width: "320px",
+      width: "100%",
+      maxWidth: isMobile ? "100%" : 320,
       borderRight: `1px solid ${theme.border}`,
       background: theme.panelBg,
       display: "flex",
@@ -153,6 +156,7 @@ const Sidebar = ({
       width: "20px",
       height: "20px",
       top: "50%",
+      right: "10%",
       transform: "translateY(-50%)",
       border: "none",
       background: "transparent",
@@ -165,6 +169,7 @@ const Sidebar = ({
     searchInputWrapper: {
       padding: "10px 16px",
       borderBottom: `1px solid ${theme.border}`,
+      position:"relative",
     }
   };
 
@@ -245,35 +250,7 @@ const Sidebar = ({
           </div>
         </div>
 
-        {/* {showUserPicker && (
-          <div style={styles.userPicker}>
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={newChatSearch}
-              onChange={(e) =>
-                setNewChatSearch(e.target.value)
-              }
-              style={styles.searchInput}
-            />
-            <h4 style={styles.userPickerTitle}>Start a new chat</h4>
 
-            {filteredUsers.length === 0 ? (
-              <p style={styles.emptyText}>No users found</p>
-            ) : (
-              filteredUsers.map((u) => (
-                <div
-                  key={u._id}
-                  style={styles.userPickerItem}
-                  onClick={() => onStartNewChat(u)}
-                >
-                  <div style={styles.userPickerName}>{u.name}</div>
-                  <div style={styles.userPickerEmail}>{u.email}</div>
-                </div>
-              ))
-            )}
-          </div>
-        )} */}
         <AnimatePresence>
           {showUserPicker && (
             <motion.div

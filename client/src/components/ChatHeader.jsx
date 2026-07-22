@@ -1,11 +1,14 @@
 import { useTheme } from "../context/ThemeContext";
 import aiIcon from "../assets/ai.png"
 import searchIcon from "../assets/search.svg"
+import useResponsive from "./hooks/useResponsive";
+import backIcon from "../assets/back.png"
 const ChatHeader = ({ name, isOnline, isTyping, aiSettings, setShowAISettings,
   pinnedMessage,
   onPinnedClick,
-  toggleSearch, onUnpin }) => {
+  toggleSearch, onUnpin, setMobileView, }) => {
   const { theme } = useTheme();
+  const { isMobile } = useResponsive();
   const styles = {
     header: {
       padding: "16px 20px",
@@ -29,6 +32,21 @@ const ChatHeader = ({ name, isOnline, isTyping, aiSettings, setShowAISettings,
   return (
     <>
       <div style={styles.header}>
+        {isMobile && (
+          <button
+            onClick={() => setMobileView("sidebar")}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontSize: 22,
+              marginRight: 12,
+              color: theme.textPrimary,
+            }}
+          >
+            <img src={backIcon} style={{ width: isMobile ? "18px" : "40px" }} alt="" />
+          </button>
+        )}
         <div>
           <h3 style={styles.name}>{name}</h3>
 
@@ -54,20 +72,25 @@ const ChatHeader = ({ name, isOnline, isTyping, aiSettings, setShowAISettings,
           <div
 
             style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               cursor: "pointer",
-              padding: "8px 12px",
+              padding: isMobile ? "8px 6px" : "8px 12px",
               borderRadius: "20px",
               background: theme.inputBg,
               border: `1px solid ${theme.border}`,
               fontSize: "13px",
               fontWeight: "600",
+              maxWidth: isMobile ? "100px" : "unset",
+              maxHeight: isMobile ? "40px" : "unset",
             }}
           >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
+                gap: isMobile ? 8 : 12,
               }}
             >
               <div
@@ -78,33 +101,32 @@ const ChatHeader = ({ name, isOnline, isTyping, aiSettings, setShowAISettings,
                   userSelect: "none",
                 }}
               >
-                <img src={searchIcon} style={{width:"20px"}} alt="" />
+                <img src={searchIcon} style={{ width: isMobile ? "15px" : "20px" }} alt="" />
               </div>
 
               <div
                 onClick={() => setShowAISettings(true)}
                 style={{
                   cursor: "pointer",
-                  padding: "8px 12px",
+                  padding: isMobile ? "4px 6px" : "8px 12px",
                   borderRadius: "20px",
                   background: theme.inputBg,
-                  color:theme.textSecondary,
+                  color: theme.textSecondary,
                   border: `1px solid ${theme.inputBorder}`,
-                  fontSize: "13px",
+                  fontSize: isMobile ? "8px" : "13px",
                   fontWeight: "600",
-                  display:"flex",
-                  gap:"4px",
-                  alignContent:"center",
+                  display: "flex",
+                  gap: isMobile ? "2px" : "4px",
 
-                  alignItems:"center"
+                  alignItems: "center"
                 }}
               >
-                <img src={aiIcon} style={{width:"20px"}} alt="" /> <span> {aiSettings.enabled ? " AI ON" : " AI OFF"}</span>
+                <img src={aiIcon} style={{ width: "20px" }} alt="" /> <span> {aiSettings.enabled ? " AI ON" : " AI OFF"}</span>
               </div>
             </div>
           </div>
         )}
-      </div>
+      </div >
       {pinnedMessage && (
         <div
           style={{
@@ -179,7 +201,8 @@ const ChatHeader = ({ name, isOnline, isTyping, aiSettings, setShowAISettings,
             ✕
           </div>
         </div>
-      )}
+      )
+      }
     </>
   );
 };

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import AttachmentBubble from "./AttachmentBubble";
 import EmojiPicker from "emoji-picker-react";
 import HighlightedText from "./HighlightedText";
+import useResponsive from "./hooks/useResponsive";
 
 const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredAt, onImageClick, seenAt, isGrouped, isGroupedWithNext, onContextMenu, replyTo, onReplyClick,
   reactions,
@@ -12,6 +13,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
   isHighlighted, deleted, edited, searchQuery }) => {
   const pickerRef = useRef(null);
   const { theme } = useTheme();
+  const {isMobile} = useResponsive();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 
@@ -106,7 +108,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
           display: "flex",
           justifyContent: isOwnMessage ? "flex-end" : "flex-start",
           marginTop: isGrouped ? "2px" : "10px",
-          color:theme.textMuted,
+          color: theme.textMuted,
         }}>
         🗑 {isOwnMessage
           ? "You deleted this message"
@@ -232,10 +234,14 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
       <div
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
+        
         style={{
 
-          maxWidth: "340px",
-          minWidth: image ? "220px" : "120px",
+          maxWidth: isMobile ? "60%" : "340px",
+          minWidth: image
+            ? (isMobile ? "170px" : "220px")
+            // : isMobile ? "50%" : attachment?.type.includes("audio") ? "30%" : "10%",
+            :"unset",
           padding: "10px 12px 8px",
           borderTopRightRadius: isOwnMessage
             ? isGrouped

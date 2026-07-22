@@ -4,8 +4,10 @@ import PDFViewer from "./PDFViewer";
 import AudioPlayer from "./AudioPlayer";
 import downloadIcon from "../assets/download.png"
 import previewIcon from "../assets/eye.png"
+import useResponsive from "./hooks/useResponsive";
 const AttachmentBubble = ({ attachment, image, onImageClick }) => {
     const { theme } = useTheme();
+    const {isMobile} = useResponsive();
     const getFileIcon = (name = "") => {
         const ext = name.split(".").pop()?.toLowerCase();
 
@@ -48,7 +50,7 @@ const AttachmentBubble = ({ attachment, image, onImageClick }) => {
 
         return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`;
     };
-
+    
     // Backward compatibility
     if (!attachment?.url && !image) return null;
 
@@ -163,7 +165,9 @@ const AttachmentBubble = ({ attachment, image, onImageClick }) => {
                 <div
                     style={{
                         display: "flex",
-                        gap: "10px",
+                        // gap: "10px",
+                        justifyContent:"space-between",
+                        alignItems: "center",
                     }}
                 >
                     {isPDF && (
@@ -173,11 +177,12 @@ const AttachmentBubble = ({ attachment, image, onImageClick }) => {
                                 flex: 1,
                                 padding: "8px",
                                 borderRadius: "8px",
+                                maxWidth:"31%",
                                 cursor: "pointer",
                                 border: "none",
                             }}
                         >
-                            <img src={previewIcon} style={{width:"20px"}} alt="" />
+                            <img src={previewIcon} style={{width: isMobile ? "15px":"20px"}} alt="" />
                         </button>
                     )}
 
@@ -186,6 +191,7 @@ const AttachmentBubble = ({ attachment, image, onImageClick }) => {
                         download={downloadFileName}
                         style={{
                             flex: 1,
+                            maxWidth:"31%",
                             textDecoration: "none",
                         }}
                     >
@@ -198,7 +204,7 @@ const AttachmentBubble = ({ attachment, image, onImageClick }) => {
                                 border: "none",
                             }}
                         >
-                            <img src={downloadIcon} style={{width:"20px"}} alt="" />
+                            <img src={downloadIcon} style={{width: isMobile ? "15px":"20px"}} alt="" />
                         </button>
                     </a>
                 </div>

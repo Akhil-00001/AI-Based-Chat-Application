@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import userIcon from "../assets/user.png"
+import useResponsive from "./hooks/useResponsive";
 
 export default function ProfileModal({
     open,
@@ -11,7 +12,7 @@ export default function ProfileModal({
     user,
 }) {
     const { login } = useAuth();
-
+    const {isMobile} = useResponsive();
     const fileInputRef = useRef(null);
 
     const [name, setName] = useState("");
@@ -23,7 +24,7 @@ export default function ProfileModal({
         if (!user) return;
 
         setName(user.name);
-        setPreview(user.profilePic || {userIcon});
+        setPreview(user.profilePic || userIcon);
         setImage(null);
     }, [user, open]);
 
@@ -101,14 +102,15 @@ export default function ProfileModal({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 999,
+            zIndex: 1001,
         },
 
         modal: {
-            width: 500,
+            width: isMobile?"300px":500,
+            height:isMobile ? "400px" : "",
             background: "#1f1f28",
             borderRadius: 18,
-            padding: 28,
+            padding: isMobile ? 10 : 28,
             color: "white",
         },
 
@@ -116,7 +118,7 @@ export default function ProfileModal({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 25,
+            marginBottom: isMobile ? 0 : 25,
         },
 
         close: {
@@ -130,7 +132,7 @@ export default function ProfileModal({
         center: {
             display: "flex",
             justifyContent: "center",
-            marginBottom: 25,
+            marginBottom: isMobile ? 5 : 25,
         },
 
         imageWrapper: {
@@ -138,8 +140,8 @@ export default function ProfileModal({
         },
 
         image: {
-            width: 150,
-            height: 150,
+            width:isMobile ? 100 : 150,
+            height: isMobile ? 100 : 150,
             borderRadius: "50%",
             objectFit: "cover",
             border: "4px solid #7c3aed",
@@ -149,8 +151,8 @@ export default function ProfileModal({
             position: "absolute",
             bottom: 5,
             right: 5,
-            width: 42,
-            height: 42,
+            width: isMobile ? 30 : 42,
+            height: isMobile ? 30 : 42,
             borderRadius: "50%",
             border: "none",
             background: "#7c3aed",
@@ -159,10 +161,10 @@ export default function ProfileModal({
         },
 
         input: {
-            width: "100%",
-            height: 46,
+            width: isMobile ? "90%" : "100%",
+            height: isMobile ? 30 : 46,
             marginTop: 8,
-            marginBottom: 18,
+            marginBottom: isMobile ? 5 : 18,
             borderRadius: 10,
             border: "1px solid #444",
             background: "#2c2c35",

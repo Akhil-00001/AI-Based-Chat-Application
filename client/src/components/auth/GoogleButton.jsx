@@ -20,7 +20,7 @@ export default function GoogleButton({
 
                 shape="pill"
 
-                size="large"
+                size= "medium"
 
                 width="250px"  
 

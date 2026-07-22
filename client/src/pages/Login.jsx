@@ -11,10 +11,11 @@ import AuthInput from "../components/auth/AuthInput";
 import AuthButton from "../components/auth/AuthButton";
 import Divider from "../components/auth/Divider";
 import GoogleButton from "../components/auth/GoogleButton";
+import useResponsive from "../components/hooks/useResponsive";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-
+  const {isMobile} = useResponsive();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -151,7 +152,7 @@ const Login = () => {
 
         <p
           style={{
-            marginTop: 16,
+            marginTop: isMobile ? 4 : 16,
             textAlign: "center",
             color: "#666",
           }}
@@ -177,7 +178,6 @@ const Login = () => {
 
 export default Login;
 
-// import { useState } from "react";
 // import { Link, useNavigate } from "react-router-dom";
 // import { GoogleLogin } from "@react-oauth/google";
 // import API from "../services/api";

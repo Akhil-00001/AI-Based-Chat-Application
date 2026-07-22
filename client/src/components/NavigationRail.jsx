@@ -17,7 +17,7 @@ const NavigationRail = ({
     container: {
       width: 70,
       minWidth: 70,
-
+      height:"100%",
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-between",

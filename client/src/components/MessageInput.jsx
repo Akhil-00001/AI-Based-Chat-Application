@@ -10,6 +10,7 @@ import microIcon from "../assets/microphone.png"
 import stickerIcon from "../assets/sticker.png"
 import recordingIcon from "../assets/stop-button.png"
 import crossIcon from "../assets/cross.png"
+import useResponsive from "./hooks/useResponsive";
 
 const MessageInput = ({
   value,
@@ -39,6 +40,7 @@ const MessageInput = ({
   const [previousDraft, setPreviousDraft] = useState("");
   const [showUndo, setShowUndo] = useState(false);
   const undoTimeoutRef = useRef(null);
+  const { isMobile } = useResponsive();
 
 
   const tones = [
@@ -144,7 +146,7 @@ const MessageInput = ({
 
   const styles = {
     imageButton: {
-      padding: "0 14px",
+      padding: isMobile ? "0 4px" : "0 14px",
       border: "none",
       borderRadius: "8px",
       cursor: "pointer",
@@ -159,16 +161,18 @@ const MessageInput = ({
     },
     wrapper: {
       display: "flex",
-      gap: "10px",
-      padding: "14px 16px",
+      gap: isMobile ? "6px" : "10px",
+      padding: isMobile ? "10px" : "14px 16px",
       borderTop: `1px solid ${theme.border}`,
       background: theme.inputBg,
       position: "relative",
+      alignItems: "center",
     },
+
     input: {
       flex: 1,
-      padding: "12px",
-      fontSize: "14px",
+      fontSize: isMobile ? "15px" : "14px",
+      padding: isMobile ? "10px" : "12px",
       border: `1px solid ${theme.inputBorder}`,
       borderRadius: "8px",
       color: theme.inputText,
@@ -176,13 +180,14 @@ const MessageInput = ({
       outline: "none",
     },
     button: {
-      padding: "12px 18px",
-      cursor: "pointer",
+      padding: isMobile ? "10px 12px" : "12px 18px",
+      minWidth: isMobile ? 46 : 80,
       border: "none",
-      borderRadius: "8px",
+      borderRadius: 8,
+      cursor: "pointer",
       background: theme.sendButtonBg,
       color: theme.sendButtonText,
-      fontWeight: "500",
+      fontWeight: 500,
     },
   };
 
@@ -368,22 +373,22 @@ const MessageInput = ({
           style={styles.imageButton}
           onClick={() => fileInputRef.current?.click()}
         >
-          <img src={attachIcon} style={{ width: "30px" }} alt="" />
+          <img src={attachIcon} style={{ width: isMobile ? "22px" : "30px" }} alt="" />
         </button>
         <button
           style={styles.imageButton}
           onClick={() => setShowEmojiPicker((prev) => !prev)}
         >
-          <img src={stickerIcon} style={{ width: "20px" }} alt="" />
+          <img src={stickerIcon} style={{ width: isMobile ? "18px" : "20px" }} alt="" />
         </button>
 
         {!isRecording ? (
           <button onClick={startRecording} style={{ border: "none", background: "transparent" }}>
-            <img src={microIcon} style={{ width: "20px" }} alt="" />
+            <img src={microIcon} style={{ width: isMobile ? "18px" : "20px" }} alt="" />
           </button>
         ) : (
           <button onClick={stopRecording} style={{ border: "none", background: "transparent" }}>
-            <img src={recordingIcon} style={{ width: "20px" }} alt="" />
+            <img src={recordingIcon} style={{ width: isMobile ? "18px" : "20px" }} alt="" />
           </button>
         )}
 
@@ -404,7 +409,7 @@ const MessageInput = ({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: isMobile ? 4 : 8,
                 width: "100%",
               }}
             >
@@ -412,13 +417,18 @@ const MessageInput = ({
                 ref={inputRef}
                 type="text"
                 placeholder="Type a message..."
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  flex: 1,
+                  minWidth: 0,
+                  width:"50%",
+                }}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
 
-              {value.trim() && (
+              {!isMobile && value.trim() && (
                 <>
                   <div
                     ref={toneMenuRef}
@@ -541,10 +551,17 @@ const MessageInput = ({
               )}
 
               <button
-                style={styles.button}
+                style={{
+                  ...styles.button,
+                  width: isMobile ? 42 : undefined,
+                  minWidth: isMobile ? 42 : undefined,
+                  height: isMobile ? 42 : undefined,
+                  borderRadius: isMobile ? "50%" : "10px",
+                  padding: isMobile ? 0 : styles.button.padding,
+                }}
                 onClick={onSend}
               >
-                Send
+                {isMobile ? "➤" : "Send"}
               </button>
               <AnimatePresence>
                 {showUndo && (
@@ -651,7 +668,7 @@ const MessageInput = ({
                   fontSize: 20,
                 }}
               >
-                <img src={crossIcon} style={{ width: "20px" }} alt="" />
+                <img src={crossIcon} style={{ width: isMobile ? "18px" : "20px" }} alt="" />
               </button>
 
               <button
