@@ -15,8 +15,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
   const { theme } = useTheme();
   const { isMobile } = useResponsive();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
-
+  const longPressTimer = useRef(null);
 
   const groupedReactions = Object.values(
     (reactions || []).reduce((acc, r) => {
@@ -77,6 +76,20 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
         setShowReactionBar(false);
       }
     }, 150);
+  };
+
+  const handleTouchStart = () => {
+    if (!isMobile) return;
+
+    longPressTimer.current = setTimeout(() => {
+      navigator.vibrate?.(25); // optional vibration
+
+      setShowReactionBar(true);
+    }, 500);
+  };
+
+  const clearLongPress = () => {
+    clearTimeout(longPressTimer.current);
   };
 
 
@@ -206,7 +219,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
                   style={{
                     position: "absolute",
                     top: "25px",
-                    left:"-180px",
+                    left: "-180px",
                     zIndex: 1000,
                   }}
                 >
@@ -234,7 +247,10 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
       <div
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
-
+        onTouchStart={handleTouchStart}
+        onTouchEnd={clearLongPress}
+        onTouchMove={clearLongPress}
+        onTouchCancel={clearLongPress}
         style={{
 
           maxWidth: isMobile ? "60%" : "340px",
@@ -336,7 +352,7 @@ const MessageBubble = ({ text, image, attachment, isOwnMessage, time, deliveredA
               style={{
                 fontSize: "14px",
                 lineHeight: "1.4",
-                color:theme.textPrimary,
+                color: theme.textPrimary,
               }}
             >
               <HighlightedText
