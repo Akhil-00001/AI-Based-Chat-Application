@@ -1553,7 +1553,7 @@ const Chat = () => {
   return (
     <div style={styles.page}>
       <>
-        {!showRail /*&& mobileView === "sidebar"*/ && <button
+        {!showRail && mobileView === "sidebar" && <button
           ref={menuButtonRef}
           onClick={() => setShowRail(prev => !prev)}
           style={{
